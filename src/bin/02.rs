@@ -11,10 +11,10 @@ fn parse_input(input: &str) -> Vec<Vec<isize>> {
         .collect::<Vec<_>>()
 }
 
-pub fn report_safe(report: Vec<isize>) -> bool {
+pub fn report_safe_p1(report: Vec<isize>) -> bool {
     report
         .windows(2)
-        .fold(Some(None), |acc: Option<Option<isize>>, pair: &[isize]| {
+        .try_fold(None, |acc: Option<isize>, pair: &[isize]| {
             let diff = pair[1] - pair[0];
 
             if diff.abs() < 1 || diff.abs() > 3 {
@@ -22,15 +22,14 @@ pub fn report_safe(report: Vec<isize>) -> bool {
             }
 
             match acc {
-                Some(None) => Some(Some(diff.signum())),
-                Some(Some(v)) => {
+                None => Some(Some(diff.signum())),
+                Some(v) => {
                     if v.signum() == diff.signum() {
-                        acc
+                        Some(acc)
                     } else {
                         None
                     }
                 }
-                None => None,
             }
         })
         .is_some()
@@ -40,7 +39,7 @@ pub fn part_one(input: &str) -> Option<usize> {
     Some(
         parse_input(input)
             .into_iter()
-            .map(|report| report_safe(report) as usize)
+            .map(|report| report_safe_p1(report) as usize)
             .sum(),
     )
 }
@@ -78,7 +77,7 @@ mod tests {
     #[case(vec![8, 6, 4, 4, 1], false)]
     #[case(vec![1, 3, 6, 7, 9], true)]
     fn test_report_safe(#[case] line: Vec<isize>, #[case] expected_safe: bool) {
-        assert_eq!(report_safe(line), expected_safe);
+        assert_eq!(report_safe_p1(line), expected_safe);
     }
 
     #[test]
