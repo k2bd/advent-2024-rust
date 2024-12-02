@@ -11,7 +11,7 @@ fn parse_input(input: &str) -> Vec<Vec<isize>> {
         .collect::<Vec<_>>()
 }
 
-pub fn report_safe(report: Vec<isize>, tolerance: bool) -> bool {
+pub fn report_safe_p1(report: &[isize]) -> bool {
     report
         .windows(2)
         .try_fold(None, |acc: Option<isize>, pair: &[isize]| {
@@ -35,17 +35,37 @@ pub fn report_safe(report: Vec<isize>, tolerance: bool) -> bool {
         .is_some()
 }
 
+pub fn report_safe_p2(report: &[isize]) -> bool {
+    let is_safe = report_safe_p1(report);
+    if is_safe {
+        return true;
+    };
+
+    (0..report.len())
+        .map(|index| {
+            let mut clone_report = report.to_owned();
+            clone_report.remove(index);
+            clone_report
+        })
+        .any(|tolerant_report| report_safe_p1(&tolerant_report))
+}
+
 pub fn part_one(input: &str) -> Option<usize> {
     Some(
         parse_input(input)
             .into_iter()
-            .map(|report| report_safe(report, false) as usize)
+            .map(|report| report_safe_p1(&report) as usize)
             .sum(),
     )
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    None
+    Some(
+        parse_input(input)
+            .into_iter()
+            .map(|report| report_safe_p2(&report) as usize)
+            .sum(),
+    )
 }
 
 #[cfg(test)]
@@ -70,18 +90,25 @@ mod tests {
     }
 
     #[rstest]
-    #[case(vec![7, 6, 4, 2, 1], false, true)]
-    #[case(vec![1, 2, 7, 8, 9], false, false)]
-    #[case(vec![9, 7, 6, 2, 1], false, false)]
-    #[case(vec![1, 3, 2, 4, 5], false, false)]
-    #[case(vec![8, 6, 4, 4, 1], false, false)]
-    #[case(vec![1, 3, 6, 7, 9], false, true)]
-    fn test_report_safe(
-        #[case] line: Vec<isize>,
-        #[case] tolerance: bool,
-        #[case] expected_safe: bool,
-    ) {
-        assert_eq!(report_safe(line, tolerance), expected_safe);
+    #[case(vec![7, 6, 4, 2, 1], true)]
+    #[case(vec![1, 2, 7, 8, 9], false)]
+    #[case(vec![9, 7, 6, 2, 1], false)]
+    #[case(vec![1, 3, 2, 4, 5], false)]
+    #[case(vec![8, 6, 4, 4, 1], false)]
+    #[case(vec![1, 3, 6, 7, 9], true)]
+    fn test_report_safe_p1(#[case] report: Vec<isize>, #[case] expected_safe: bool) {
+        assert_eq!(report_safe_p1(&report), expected_safe);
+    }
+
+    #[rstest]
+    #[case(vec![7, 6, 4, 2, 1], true)]
+    #[case(vec![1, 2, 7, 8, 9], false)]
+    #[case(vec![9, 7, 6, 2, 1], false)]
+    #[case(vec![1, 3, 2, 4, 5], true)]
+    #[case(vec![8, 6, 4, 4, 1], true)]
+    #[case(vec![1, 3, 6, 7, 9], true)]
+    fn test_report_safe_p2(#[case] report: Vec<isize>, #[case] expected_safe: bool) {
+        assert_eq!(report_safe_p2(&report), expected_safe);
     }
 
     #[test]
@@ -93,6 +120,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(4));
     }
 }
