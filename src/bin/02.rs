@@ -36,8 +36,7 @@ pub fn report_safe_p1(report: &[isize]) -> bool {
 }
 
 pub fn report_safe_p2(report: &[isize]) -> bool {
-    let is_safe = report_safe_p1(report);
-    if is_safe {
+    if report_safe_p1(report) {
         return true;
     };
 
