@@ -33,14 +33,16 @@ pub fn part_two(input: &str) -> Option<u32> {
 
     Some(
         re.find_iter(input)
-            .fold((0, true), |acc, expr| match expr.as_str() {
-                "do()" => (acc.0, true),
-                "don't()" => (acc.0, false),
-                e => {
-                    if acc.1 {
-                        (acc.0 + eval_mul_expression(e), acc.1)
-                    } else {
-                        acc
+            .fold((0, true), |(result, mul_enabled), expr| {
+                match expr.as_str() {
+                    "do()" => (result, true),
+                    "don't()" => (result, false),
+                    e => {
+                        if mul_enabled {
+                            (result + eval_mul_expression(e), mul_enabled)
+                        } else {
+                            (result, mul_enabled)
+                        }
                     }
                 }
             })
