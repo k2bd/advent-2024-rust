@@ -111,13 +111,13 @@ mod tests {
     }
 
     #[test]
-    fn test_part_one() {
+    fn test_day_2_part_one_from_example() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(2));
     }
 
     #[test]
-    fn test_part_two() {
+    fn test_day_2_part_two_from_example() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(4));
     }

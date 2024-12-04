@@ -9,6 +9,17 @@ Repo created from [fspoettel/advent-of-code-rust](https://github.com/fspoettel/a
 <!--- advent_readme_stars table --->
 
 <!--- benchmarking table --->
+## Benchmarks
+
+| Day | Part 1 | Part 2 |
+| :---: | :---: | :---:  |
+| [Day 1](./src/bin/01.rs) | `67.0µs` | `114.0µs` |
+| [Day 2](./src/bin/02.rs) | `300.9µs` | `403.7µs` |
+| [Day 3](./src/bin/03.rs) | `426.3µs` | `463.5µs` |
+| [Day 4](./src/bin/04.rs) | `619.9µs` | `1.2ms` |
+
+**Total: 3.60ms**
+<!--- benchmarking table --->
 
 ## Usage
 

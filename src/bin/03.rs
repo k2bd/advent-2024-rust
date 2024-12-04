@@ -55,13 +55,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_part_one() {
+    fn test_day_3_part_one_from_example() {
         let result = part_one(&advent_of_code::template::read_file("examples", DAY));
         assert_eq!(result, Some(161));
     }
 
     #[test]
-    fn test_part_two() {
+    fn test_day_3_part_two_from_example() {
         let input = "xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
         let result = part_two(input);
         assert_eq!(result, Some(48));
