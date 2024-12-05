@@ -17,8 +17,9 @@ Repo created from [fspoettel/advent-of-code-rust](https://github.com/fspoettel/a
 | [Day 2](./src/bin/02.rs) | `300.9µs` | `403.7µs` |
 | [Day 3](./src/bin/03.rs) | `426.3µs` | `463.5µs` |
 | [Day 4](./src/bin/04.rs) | `619.9µs` | `1.2ms` |
+| [Day 5](./src/bin/05.rs) | `1.9ms` | `3.1ms` |
 
-**Total: 3.60ms**
+**Total: 8.60ms**
 <!--- benchmarking table --->
 
 ## Usage
