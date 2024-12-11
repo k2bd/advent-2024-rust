@@ -6,7 +6,7 @@ fn blink(stone: usize) -> Vec<usize> {
     let value = stone.to_string();
 
     if value == "0" {
-        return vec![1];
+        vec![1]
     } else if value.len() % 2 == 0 {
         return vec![
             value[..value.len() / 2].parse().unwrap(),

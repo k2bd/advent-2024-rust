@@ -1,8 +1,6 @@
-use itertools::{Combinations, Itertools};
+use itertools::Itertools;
 use std::{
-    any::Any,
     collections::HashSet,
-    mem::discriminant,
     ops::{Add, Sub},
 };
 
@@ -63,8 +61,7 @@ impl CityField {
         self.antennas
             .iter()
             .combinations(2)
-            .map(|c| c[0].antinode_locations(c[1]))
-            .flatten()
+            .flat_map(|c| c[0].antinode_locations(c[1]))
             .filter(|&p| p.0 >= 0 && p.0 < self.dimensions.0 && p.1 >= 0 && p.1 < self.dimensions.1)
             .collect()
     }
