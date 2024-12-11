@@ -1,56 +1,71 @@
+use std::collections::HashMap;
+
 advent_of_code::solution!(11);
 
-#[derive(Debug, PartialEq)]
-struct PlutoStone {
-    value: usize,
+fn blink(stone: usize) -> Vec<usize> {
+    let value = stone.to_string();
+
+    if value == "0" {
+        return vec![1];
+    } else if value.len() % 2 == 0 {
+        return vec![
+            value[..value.len() / 2].parse().unwrap(),
+            value[value.len() / 2..].parse().unwrap(),
+        ];
+    } else {
+        return vec![stone * 2024];
+    }
 }
 
-impl PlutoStone {
-    fn new(value: usize) -> Self {
-        Self { value }
+fn parse_input(input: &str) -> Vec<usize> {
+    input
+        .trim()
+        .split(" ")
+        .map(|v| v.parse().unwrap())
+        .collect()
+}
+
+fn get_length_at_depth(
+    stone: usize,
+    depth: usize,
+    cache: &mut HashMap<(usize, usize), usize>,
+) -> usize {
+    if depth == 0 {
+        return 1;
     }
-
-    fn blink(&self) -> Vec<PlutoStone> {
-        let value = self.value.to_string();
-
-        if value == "0" {
-            return vec![PlutoStone::new(1)];
-        } else if value.len() % 2 == 0 {
-            return vec![
-                PlutoStone::new(value[..value.len() / 2].parse().unwrap()),
-                PlutoStone::new(value[value.len() / 2..].parse().unwrap()),
-            ];
-        } else {
-            return vec![PlutoStone::new(self.value * 2024)];
+    match cache.get(&(stone, depth)) {
+        Some(&val) => val,
+        None => {
+            let stones = blink(stone);
+            let result = stones
+                .into_iter()
+                .map(|s| get_length_at_depth(s, depth - 1, cache))
+                .sum();
+            cache.insert((stone, depth), result);
+            result
         }
     }
 }
 
-fn parse_input(input: &str) -> Vec<PlutoStone> {
-    input
-        .trim()
-        .split(" ")
-        .map(|v| PlutoStone::new(v.parse().unwrap()))
-        .collect()
-}
-
 pub fn part_one(input: &str) -> Option<usize> {
+    let mut cache = HashMap::new();
+
     Some(
-        (0..25)
-            .fold(parse_input(input), |acc, _| {
-                acc.iter().map(|stone| stone.blink()).flatten().collect()
-            })
-            .len(),
+        parse_input(input)
+            .into_iter()
+            .map(|stone| get_length_at_depth(stone, 25, &mut cache))
+            .sum(),
     )
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
+    let mut cache = HashMap::new();
+
     Some(
-        (0..75)
-            .fold(parse_input(input), |acc, _| {
-                acc.iter().map(|stone| stone.blink()).flatten().collect()
-            })
-            .len(),
+        parse_input(input)
+            .into_iter()
+            .map(|stone| get_length_at_depth(stone, 75, &mut cache))
+            .sum(),
     )
 }
 
@@ -60,13 +75,13 @@ mod tests {
     use rstest::*;
 
     #[rstest]
-    #[case(PlutoStone::new(0), vec![PlutoStone::new(1)])]
-    #[case(PlutoStone::new(1), vec![PlutoStone::new(2024)])]
-    #[case(PlutoStone::new(10), vec![PlutoStone::new(1), PlutoStone::new(0)])]
-    #[case(PlutoStone::new(99), vec![PlutoStone::new(9), PlutoStone::new(9)])]
-    #[case(PlutoStone::new(999), vec![PlutoStone::new(2021976)])]
-    fn test_blink(#[case] stone: PlutoStone, #[case] expected: Vec<PlutoStone>) {
-        assert_eq!(stone.blink(), expected)
+    #[case(0, vec![1])]
+    #[case(1, vec![2024])]
+    #[case(10, vec![1, 0])]
+    #[case(99, vec![9, 9])]
+    #[case(999, vec![2021976])]
+    fn test_blink(#[case] stone: usize, #[case] expected: Vec<usize>) {
+        assert_eq!(blink(stone), expected)
     }
 
     #[test]
@@ -78,6 +93,6 @@ mod tests {
     #[test]
     fn test_day_11_part_two_from_example() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(65601038650482));
     }
 }
