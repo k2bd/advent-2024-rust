@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use std::{
     collections::HashSet,
-    ops::{Add, Sub},
+    ops::{Add, Mul, Sub},
 };
 
 advent_of_code::solution!(8);
@@ -25,6 +25,14 @@ impl Sub for Point {
     }
 }
 
+impl Mul<isize> for Point {
+    type Output = Self;
+
+    fn mul(self, rhs: isize) -> Self::Output {
+        Self(self.0 * rhs, self.1 * rhs)
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Hash)]
 struct Antenna {
     location: Point,
@@ -39,7 +47,7 @@ impl Antenna {
         }
     }
 
-    fn antinode_locations(&self, other: &Self) -> HashSet<Point> {
+    fn first_antinode_locations(&self, other: &Self) -> HashSet<Point> {
         if self.frequency != other.frequency {
             return HashSet::new();
         }
@@ -47,6 +55,35 @@ impl Antenna {
         let diff = self.location - other.location;
 
         HashSet::from([self.location + diff, other.location - diff])
+    }
+
+    fn repeating_antinode_locations(
+        &self,
+        other: &Self,
+        dimensions: (isize, isize),
+    ) -> HashSet<Point> {
+        let mut result = HashSet::new();
+
+        if self.frequency != other.frequency {
+            return result;
+        }
+
+        let diff = self.location - other.location;
+
+        (0isize..)
+            .map(|i| self.location + diff * i)
+            .take_while(|p| p.0 >= 0 && p.0 < dimensions.0 && p.1 >= 0 && p.1 < dimensions.1)
+            .for_each(|p| {
+                result.insert(p);
+            });
+        (0isize..)
+            .map(|i| other.location - diff * i)
+            .take_while(|p| p.0 >= 0 && p.0 < dimensions.0 && p.1 >= 0 && p.1 < dimensions.1)
+            .for_each(|p| {
+                result.insert(p);
+            });
+
+        result
     }
 }
 
@@ -57,11 +94,20 @@ struct CityField {
 }
 
 impl CityField {
-    fn all_antinode_locations(&self) -> HashSet<Point> {
+    fn all_first_antinode_locations(&self) -> HashSet<Point> {
         self.antennas
             .iter()
             .combinations(2)
-            .flat_map(|c| c[0].antinode_locations(c[1]))
+            .flat_map(|c| c[0].first_antinode_locations(c[1]))
+            .filter(|&p| p.0 >= 0 && p.0 < self.dimensions.0 && p.1 >= 0 && p.1 < self.dimensions.1)
+            .collect()
+    }
+
+    fn all_repeating_antinode_locations(&self) -> HashSet<Point> {
+        self.antennas
+            .iter()
+            .combinations(2)
+            .flat_map(|c| c[0].repeating_antinode_locations(c[1], self.dimensions))
             .filter(|&p| p.0 >= 0 && p.0 < self.dimensions.0 && p.1 >= 0 && p.1 < self.dimensions.1)
             .collect()
     }
@@ -89,11 +135,11 @@ fn parse_input(input: &str) -> CityField {
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
-    Some(parse_input(input).all_antinode_locations().len())
+    Some(parse_input(input).all_first_antinode_locations().len())
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    None
+    Some(parse_input(input).all_repeating_antinode_locations().len())
 }
 
 #[cfg(test)]
@@ -130,6 +176,6 @@ mod tests {
     #[test]
     fn test_day_8_part_two_from_example() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(34));
     }
 }
