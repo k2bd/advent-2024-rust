@@ -31,17 +31,16 @@ fn parse_input(input: &str) -> Vec<GardenPlot> {
     let mut all_points: HashMap<(isize, isize), char> = input
         .lines()
         .enumerate()
-        .map(|(row, line)| {
+        .flat_map(|(row, line)| {
             line.char_indices()
                 .map(move |(col, char)| ((row as isize, col as isize), char))
         })
-        .flatten()
         .collect();
 
     let mut result = Vec::<GardenPlot>::new();
 
     while !all_points.is_empty() {
-        let key = all_points.keys().next().unwrap().clone();
+        let key = *all_points.keys().next().unwrap();
         let plot_char = all_points.remove(&key).unwrap();
 
         let mut plot_points = HashSet::from([key]);
@@ -52,8 +51,7 @@ fn parse_input(input: &str) -> Vec<GardenPlot> {
             .map(|&(dr, dc)| (key.0 + dr, key.1 + dc))
             .collect();
 
-        while !to_visit.is_empty() {
-            let neighbor_point = to_visit.pop().unwrap();
+        while let Some(neighbor_point) = to_visit.pop() {
             visited.insert(neighbor_point);
 
             if let Some(neighbor_char) = all_points.get(&neighbor_point) {
