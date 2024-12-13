@@ -24,7 +24,7 @@ impl Sub for Point {
     }
 }
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Eq, Hash, Copy)]
 enum Direction {
     NORTH,
     EAST,
@@ -60,6 +60,7 @@ impl Add<Direction> for Point {
     }
 }
 
+#[derive(PartialEq, Clone, Eq, Hash)]
 struct Guard {
     position: Point,
     facing: Direction,
@@ -79,6 +80,7 @@ impl Guard {
     }
 }
 
+#[derive(PartialEq, Clone)]
 struct Field {
     guard: Guard,
     obstacles: HashSet<Point>,
@@ -89,9 +91,9 @@ impl Field {
     fn step(&mut self) {
         if self.obstacles.contains(&self.guard.forward()) {
             self.guard.turn_right();
-            return self.step();
+        } else {
+            self.guard.step();
         }
-        self.guard.step();
     }
 
     fn all_steps(&mut self) -> HashSet<Point> {
@@ -107,6 +109,30 @@ impl Field {
         }
 
         visited
+    }
+
+    fn add_obstacle(&mut self, at: Point) -> bool {
+        self.obstacles.insert(at)
+    }
+
+    fn is_loop(&mut self) -> bool {
+        let mut past_guards = HashSet::from([self.guard.clone()]);
+
+        while self.guard.position.0 >= 0
+            && self.guard.position.0 < self.size.0
+            && self.guard.position.1 >= 0
+            && self.guard.position.1 < self.size.1
+        {
+            self.step();
+
+            if past_guards.contains(&self.guard) {
+                return true;
+            }
+
+            past_guards.insert(self.guard.clone());
+        }
+
+        false
     }
 }
 
@@ -162,12 +188,28 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    None
+    let field = parse_input(input);
+
+    Some(
+        (0..field.size.0)
+            .flat_map(|obs_row| (0..field.size.1).map(move |obs_col| Point(obs_row, obs_col)))
+            .filter(|&p| {
+                if field.obstacles.contains(&p) || field.guard.position == p {
+                    false
+                } else {
+                    let mut new_field = field.clone();
+                    new_field.add_obstacle(p);
+                    new_field.is_loop()
+                }
+            })
+            .count(),
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rstest::*;
 
     #[test]
     fn test_day_6_part_one_from_example() {
@@ -175,9 +217,19 @@ mod tests {
         assert_eq!(result, Some(41));
     }
 
+    #[rstest]
+    #[case(Point(6, 3), true)]
+    #[case(Point(5, 4), false)]
+    fn test_is_loop(#[case] added_obstacle: Point, #[case] should_loop: bool) {
+        let mut field = parse_input(&advent_of_code::template::read_file("examples", DAY));
+        field.add_obstacle(added_obstacle);
+
+        assert_eq!(field.is_loop(), should_loop);
+    }
+
     #[test]
     fn test_day_6_part_two_from_example() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(6));
     }
 }
