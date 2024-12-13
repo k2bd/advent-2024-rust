@@ -26,28 +26,28 @@ impl Sub for Point {
 
 #[derive(PartialEq, Clone, Eq, Hash, Copy)]
 enum Direction {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
+    North,
+    East,
+    South,
+    West,
 }
 
 impl Direction {
     fn point(&self) -> Point {
         match self {
-            Direction::NORTH => Point(-1, 0),
-            Direction::EAST => Point(0, 1),
-            Direction::SOUTH => Point(1, 0),
-            Direction::WEST => Point(0, -1),
+            Direction::North => Point(-1, 0),
+            Direction::East => Point(0, 1),
+            Direction::South => Point(1, 0),
+            Direction::West => Point(0, -1),
         }
     }
 
     fn turn_right(&self) -> Self {
         match self {
-            Direction::NORTH => Direction::EAST,
-            Direction::EAST => Direction::SOUTH,
-            Direction::SOUTH => Direction::WEST,
-            Direction::WEST => Direction::NORTH,
+            Direction::North => Direction::East,
+            Direction::East => Direction::South,
+            Direction::South => Direction::West,
+            Direction::West => Direction::North,
         }
     }
 }
@@ -140,12 +140,11 @@ fn parse_input(input: &str) -> Field {
     let obstacles = input
         .lines()
         .enumerate()
-        .map(|(row, line)| {
+        .flat_map(|(row, line)| {
             line.char_indices()
                 .filter(|&(_, val)| val == '#')
-                .map(move |(col, val)| Point(row as isize, col as isize))
+                .map(move |(col, _)| Point(row as isize, col as isize))
         })
-        .flatten()
         .collect::<HashSet<_>>();
 
     let size = Point(
@@ -156,23 +155,22 @@ fn parse_input(input: &str) -> Field {
     let guard = input
         .lines()
         .enumerate()
-        .map(|(row, line)| {
+        .flat_map(|(row, line)| {
             line.char_indices()
                 .filter(|&(_, val)| ['v', '^', '<', '>'].contains(&val))
                 .map(move |(col, val)| Guard {
                     position: Point(row as isize, col as isize),
                     facing: match val {
-                        '^' => Direction::NORTH,
-                        '>' => Direction::EAST,
-                        'v' => Direction::SOUTH,
-                        '<' => Direction::WEST,
+                        '^' => Direction::North,
+                        '>' => Direction::East,
+                        'v' => Direction::South,
+                        '<' => Direction::West,
                         _ => {
                             panic!("Lazy exit for val")
                         }
                     },
                 })
         })
-        .flatten()
         .next()
         .unwrap();
 
