@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Rem, Sub};
+use std::ops::{Add, Mul, Rem, Sub};
 
 advent_of_code::solution!(14);
 
@@ -72,7 +72,7 @@ struct RoboRoom {
 impl RoboRoom {
     fn from_input(input: &str, width: usize, height: usize) -> Self {
         Self {
-            robots: input.lines().map(|line| Robot::from_line(line)).collect(),
+            robots: input.lines().map(Robot::from_line).collect(),
             size: Point(width as isize, height as isize),
         }
     }
@@ -97,13 +97,13 @@ impl RoboRoom {
             ),
         ]
         .into_iter()
-        .map(|(((x_min, x_max), (y_min, y_max)))| {
+        .map(|((x_min, x_max), (y_min, y_max))| {
             positions
                 .iter()
                 .filter(|&&Point(x, y)| x >= x_min && x < x_max && y >= y_min && y < y_max)
                 .count()
         })
-        .fold(1, |acc, value| acc * value)
+        .product::<usize>()
     }
 }
 

@@ -1,5 +1,3 @@
-use std::ops::Index;
-
 advent_of_code::solution!(9);
 
 #[derive(Debug, PartialEq)]
