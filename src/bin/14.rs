@@ -1,5 +1,7 @@
 use std::ops::{Add, Mul, Rem, Sub};
 
+use itertools::Itertools;
+
 advent_of_code::solution!(14);
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, PartialOrd, Ord)]
@@ -105,6 +107,55 @@ impl RoboRoom {
         })
         .product::<usize>()
     }
+
+    /// I hate this question. I looked up what the tree looks like and then
+    /// wrote some garbage that would probably match on it
+    fn time_to_christmas(&self) -> usize {
+        let answer = (0usize..)
+            .take_while_inclusive(|&time| {
+                let positions = self.positions_at_timepoint(time as isize);
+
+                let squares = positions
+                    .iter()
+                    .filter(|&&p| {
+                        [
+                            Point(-1, -1),
+                            Point(-1, 0),
+                            Point(-1, 1),
+                            Point(0, -1),
+                            Point(0, 1),
+                            Point(1, -1),
+                            Point(1, 0),
+                            Point(1, 1),
+                        ]
+                        .into_iter()
+                        .all(|d| positions.contains(&(p + d)))
+                    })
+                    .count();
+
+                squares < 5
+            })
+            .last()
+            .unwrap();
+
+        let positions = self.positions_at_timepoint(answer as isize);
+        (0..self.size.1).for_each(|y| {
+            println!(
+                "|{}|",
+                (0..self.size.0)
+                    .map(|x| {
+                        if positions.contains(&Point(x, y)) {
+                            "X"
+                        } else {
+                            " "
+                        }
+                    })
+                    .join("")
+            )
+        });
+
+        answer
+    }
 }
 
 pub fn part_one(input: &str) -> Option<usize> {
@@ -112,7 +163,7 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    None
+    Some(RoboRoom::from_input(input, 101, 103).time_to_christmas())
 }
 
 #[cfg(test)]
@@ -211,11 +262,5 @@ mod tests {
             RoboRoom::from_input(&advent_of_code::template::read_file("examples", DAY), 11, 7)
                 .safety_factor_at_timepoint(100);
         assert_eq!(result, 12);
-    }
-
-    #[test]
-    fn test_day_14_part_two_from_example() {
-        let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
     }
 }
